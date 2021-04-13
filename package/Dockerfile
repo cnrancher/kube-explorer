@@ -8,7 +8,7 @@ RUN \
     cd steve && \
     git reset --hard ${GIT_COMMIT} && \
     go mod vendor && \
-    CGO_ENABLED=0 go build -ldflags "-X github.com/rancher/steve/pkg/ui.UIOffline=true -extldflags -static -s" -o /steve
+    CGO_ENABLED=0 go build -ldflags "-X github.com/rancher/steve/pkg/ui.UIOffline=true -extldflags -static -s" -o /kube-explorer
 
 FROM alpine:3.13
 
@@ -20,7 +20,7 @@ RUN apk -U --no-cache add bash curl ca-certificates && \
     curl -sL https://releases.rancher.com/dashboard/${CATTLE_DASHBOARD_UI_VERSION}.tar.gz | tar xvzf - --strip-components=2 && \
     ln -s dashboard/index.html ../index.html
 
-COPY --from=build /steve /usr/bin/steve
+COPY --from=build /kube-explorer /usr/bin/
 COPY entrypoint.sh /usr/bin
 # Hack to make golang do files,dns search order
 ENV LOCALDOMAIN=""

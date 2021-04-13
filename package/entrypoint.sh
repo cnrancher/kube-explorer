@@ -1,3 +1,3 @@
 #!/bin/bash
 
-/usr/bin/steve --ui-path /usr/share/rancher/ui-dashboard "${@}"
+/usr/bin/kube-explorer --ui-path /usr/share/rancher/ui-dashboard "${@}"
