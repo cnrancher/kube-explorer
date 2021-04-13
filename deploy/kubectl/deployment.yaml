@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kube-explorer
+  namespace: kube-system
+  labels:
+    app: kube-explorer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kube-explorer
+  template:
+    metadata:
+      namespace: kube-system
+      labels:
+        app: kube-explorer
+    spec:
+      serviceAccountName: kube-explorer
+      containers:
+      - image: niusmallnan/kube-explorer
+        imagePullPolicy: IfNotPresent
+        name: kube-explorer
+        ports:
+        - containerPort: 8989
+          protocol: TCP
+        args:
+        - "--https-listen-port=0"
+        - "--http-listen-port=8989"
