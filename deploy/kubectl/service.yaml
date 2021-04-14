@@ -6,13 +6,11 @@ metadata:
   labels:
     app: kube-explorer
 spec:
-  type: NodePort
   ports:
   - port: 8989
     targetPort: 8989
     protocol: TCP
     name: http
-    nodePort: 30089
   selector:
     app: kube-explorer
 
