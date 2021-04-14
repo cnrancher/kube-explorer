@@ -1,6 +1,6 @@
 FROM golang:1.15.11 as build
 ENV GIT_COMMIT="5049a746da959ae521526d9b672a162c2fef3959"
-ENV GIT_BRANCH="dev"
+ENV GIT_BRANCH="kube-explorer"
 RUN \
     mkdir -p /go/src/github.com/rancher/ && \
     cd /go/src/github.com/rancher/ && \
