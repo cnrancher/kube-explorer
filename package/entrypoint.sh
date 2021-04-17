@@ -1,3 +1,3 @@
-#!/bin/bash
+#!/bin/sh
 
-/usr/bin/kube-explorer "${@}"
+kube-explorer "${@}"
