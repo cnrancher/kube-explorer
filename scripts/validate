@@ -1,0 +1,21 @@
+#!/bin/bash
+set -e
+
+pushd $GIT_SOURCE
+
+if ! command -v golangci-lint; then
+    echo Running: go fmt
+    echo Skipping validation: no golangci-lint available test -z "$(go fmt ./... | tee /dev/stderr)"
+    exit
+fi
+
+#echo Running: golangci-lint
+#golangci-lint run
+
+echo Tidying up modules
+go mod tidy
+
+echo Verifying modules
+go mod verify
+
+popd

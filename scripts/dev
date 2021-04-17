@@ -1,0 +1,18 @@
+#!/bin/bash
+set -e
+
+cd $(dirname $0)
+./download
+
+[ "$(uname)" != "Darwin" ] && LINKFLAGS="-extldflags -static -s"
+
+pushd $GIT_SOURCE
+
+CGO_ENABLED=0 go build \
+    -ldflags \
+    "$LINKFLAGS" \
+    -o bin/kube-explorer
+
+mv bin/kube-explorer $DAPPER_SOURCE/bin/
+
+popd
