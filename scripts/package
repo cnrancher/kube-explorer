@@ -5,7 +5,13 @@ source $(dirname $0)/version
 
 pushd $DAPPER_SOURCE
 
-cp bin/kube-explorer package/
+if [ -f bin/kube-explorer-linux-${ARCH} ]; then
+    # For cross mode
+    cp bin/kube-explorer-linux-${ARCH} package/kube-explorer
+else
+    # For common mode
+    cp bin/kube-explorer package/
+fi
 cd package
 docker build -f Dockerfile -t niusmallnan/kube-explorer:$VERSION .
 
