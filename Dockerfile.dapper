@@ -22,7 +22,7 @@ RUN wget -O - ${!DOCKER_URL} > /usr/bin/docker && chmod +x /usr/bin/docker
 ENV GIT_COMMIT="327be56d3a6a2b85cf4751148f6834402e8211d5" \
     GIT_BRANCH="kube-explorer" \
     GIT_SOURCE="/go/src/github.com/rancher/steve" \
-    CATTLE_DASHBOARD_UI_VERSION=v2.5.8-rc3
+    CATTLE_DASHBOARD_UI_VERSION=v2.5.8
 
 ENV DAPPER_ENV REPO TAG DRONE_TAG CROSS
 ENV DAPPER_SOURCE /opt/kube-explorer
