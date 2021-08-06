@@ -4,7 +4,6 @@ set -e
 source $(dirname $0)/version
 
 OS_ARCH_ARG_LINUX="amd64 arm arm64"
-OS_ARCH_ARG_WINDOWS="amd64"
 OS_ARCH_ARG_DARWIN="amd64"
 
 LD_INJECT_VALUES="-X github.com/rancher/steve/pkg/version.Version=$VERSION
@@ -19,15 +18,6 @@ if [ -n "$CROSS" ]; then
         OUTPUT_BIN="bin/kube-explorer-linux-$ARCH"
         echo "Building binary for linux/$ARCH..."
         GOARCH=$ARCH GOOS=linux CGO_ENABLED=0 go build -tags embed \
-                -ldflags \
-                "$LD_INJECT_VALUES $LINKFLAGS" \
-                -o ${OUTPUT_BIN}
-    done
-
-    for ARCH in ${OS_ARCH_ARG_WINDOWS}; do
-        OUTPUT_BIN="bin/kube-explorer-windows-$ARCH.exe"
-        echo "Building binary for windows/$ARCH..."
-        GOARCH=$ARCH GOOS=windows CGO_ENABLED=0 go build -tags embed \
                 -ldflags \
                 "$LD_INJECT_VALUES $LINKFLAGS" \
                 -o ${OUTPUT_BIN}
