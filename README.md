@@ -21,7 +21,15 @@ Then, open the browser to visit http://x.x.x.x:9898 .
 To debug on an AMD64 Linux host:
 
 ```
-make
+make dev
+
+# $basedir=/opt/ui/dist/
+# prepare the file trees like this
+# $basedir/dashboard/
+# $basedir/index.html
+
+# good to go!
+./kube-explorer --debug  --ui-path /opt/ui/dist/ --http-listen-port=9898 --https-listen-port=0
 ```
 
 To build all cross-platform binaries:
