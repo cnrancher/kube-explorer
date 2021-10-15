@@ -1,6 +1,6 @@
 # kube-explorer
 
-kube-explorer is portable explorer for Kubernetes, without any dependency.
+kube-explorer is a portable explorer for Kubernetes without any dependency.
 
 It integrates the Rancher steve framework and its dashboard, and is recompiled, packaged, compressed, and provides an almost completely stateless Kubernetes resource manager.
 
@@ -15,3 +15,17 @@ To run an HTTP only server:
 ```
 
 Then, open the browser to visit http://x.x.x.x:9898 .
+
+## Build ✅
+
+To debug on an AMD64 Linux host:
+
+```
+make
+```
+
+To build all cross-platform binaries:
+
+```
+CROSS=1 make
+```
