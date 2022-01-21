@@ -123,6 +123,7 @@ trigger:
     include:
     - "refs/heads/main"
     - "refs/heads/v*"
+    - "refs/tags/*"
   event:
     exclude:
     - promote
@@ -150,6 +151,7 @@ steps:
       include:
       - "refs/heads/main"
       - "refs/heads/v*"
+      - "refs/tags/*"
     event:
     - push
     - tag
@@ -163,6 +165,7 @@ steps:
       include:
       - "refs/heads/main"
       - "refs/heads/v*"
+      - "refs/tags/*"
     event:
     - push
     - tag
@@ -217,6 +220,7 @@ trigger:
     include:
     - "refs/heads/main"
     - "refs/heads/v*"
+    - "refs/tags/*"
   event:
     exclude:
     - promote
@@ -276,6 +280,7 @@ trigger:
     include:
     - "refs/heads/main"
     - "refs/heads/v*"
+    - "refs/tags/*"
   event:
     exclude:
     - promote
