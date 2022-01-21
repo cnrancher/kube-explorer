@@ -18,7 +18,7 @@ spec:
     spec:
       serviceAccountName: kube-explorer
       containers:
-      - image: niusmallnan/kube-explorer
+      - image: cnrancher/kube-explorer
         imagePullPolicy: IfNotPresent
         name: kube-explorer
         ports:
