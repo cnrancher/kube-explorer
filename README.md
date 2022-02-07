@@ -16,6 +16,8 @@ To run an HTTP only server:
 
 Then, open the browser to visit http://x.x.x.x:9898 .
 
+![](docs/assets/kube-explorer-record.gif)
+
 ## Build ✅
 
 To debug on an AMD64 Linux host:
