@@ -6,7 +6,7 @@ It integrates the Rancher steve framework and its dashboard, and is recompiled, 
 
 ## Usage ✅
 
-Please download the binary from the [release page](https://github.com/niusmallnan/kube-explorer/releases).
+Please download the binary from the [release page](https://github.com/cnrancher/kube-explorer/releases).
 
 To run an HTTP only server:
 
