@@ -40,7 +40,13 @@ else
 fi
 
 for f in $(ls ./bin/); do
-    upx -o $DAPPER_SOURCE/bin/$f bin/$f
+    upx -o $DAPPER_SOURCE/bin/$f bin/$f || true
+    if [ -f $DAPPER_SOURCE/bin/$f ]; then
+        echo "UPX done!"
+    else
+        echo "Copy origin file as UPX failed!!!"
+        cp bin/$f $DAPPER_SOURCE/bin/$f
+    fi
 done
 
 popd
