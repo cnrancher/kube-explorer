@@ -70,6 +70,8 @@ steps:
     - sha256
     files:
     - "bin/*"
+    title: "${DRONE_TAG}"
+    overwrite: true
   when:
     event:
     - tag
