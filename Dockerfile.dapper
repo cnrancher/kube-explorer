@@ -19,7 +19,7 @@ ENV DOCKER_URL_amd64=https://get.docker.com/builds/Linux/x86_64/docker-1.10.3 \
     DOCKER_URL=DOCKER_URL_${ARCH}
 RUN wget -O - ${!DOCKER_URL} > /usr/bin/docker && chmod +x /usr/bin/docker
 
-ENV GIT_COMMIT="f91b3045caf06ce69d7ad5cf28f85451afc1b54b" \
+ENV GIT_COMMIT="26e14afc0b652b0363fc38e05ef28aa99d26694c" \
     GIT_BRANCH="ke/v0.2" \
     GIT_SOURCE="/go/src/github.com/rancher/steve" \
     CATTLE_DASHBOARD_UI_VERSION="v2.6.7-kube-explorer-ui-rc1"
