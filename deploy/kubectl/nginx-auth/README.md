@@ -1,4 +1,4 @@
-## Traefik Auth
+## Ingress-Nginx Basic Auth
 
 This can be used in the cluster which uses the nginx-ingress.
 
