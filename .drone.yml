@@ -96,6 +96,21 @@ steps:
     event:
     - push
 
+- name: image-scan-head
+  image: aquasec/trivy
+  commands:
+  - trivy image --no-progress --ignore-unfixed --severity HIGH,CRITICAL --security-checks vuln --exit-code 1 cnrancher/kube-explorer:head-linux-amd64
+  volumes:
+  - name: docker
+    path: /var/run/docker.sock
+  when:
+    ref:
+      include:
+      - "refs/heads/main"
+      - "refs/heads/v*"
+    event:
+    - push
+
 - name: docker-publish
   pull: default
   image: plugins/docker
