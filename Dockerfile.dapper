@@ -6,7 +6,7 @@ ENV HOST_ARCH=${DAPPER_HOST_ARCH} ARCH=${DAPPER_HOST_ARCH}
 RUN apt-get update && \
     apt-get install -y ca-certificates git wget curl xz-utils && \
     rm -f /bin/sh && ln -s /bin/bash /bin/sh && \
-    curl -sL https://github.com/upx/upx/releases/download/v4.0.1/upx-4.0.1-${ARCH}_linux.tar.xz | tar xvJf - --strip-components=1 -C /tmp && \
+    curl -sL https://github.com/upx/upx/releases/download/v4.0.2/upx-4.0.2-${ARCH}_linux.tar.xz | tar xvJf - --strip-components=1 -C /tmp && \
     mv /tmp/upx /usr/bin/
 
 RUN if [ "${ARCH}" == "amd64" ]; then \
