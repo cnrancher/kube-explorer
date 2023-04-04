@@ -40,7 +40,7 @@ else
 fi
 
 for f in $(ls ./bin/); do
-    if [[ $f != *darwin-arm64 ]]; then
+    if [[ $f != *darwin* ]]; then
         upx -o $DAPPER_SOURCE/bin/$f bin/$f || true
     fi
     if [ -f $DAPPER_SOURCE/bin/$f ]; then
