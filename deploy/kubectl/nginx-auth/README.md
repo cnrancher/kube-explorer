@@ -14,7 +14,7 @@ To install this mode, just run this script:
 
 ```
 kubectl apply -f ./secret.yaml
-export MY_XIP_IO=$(curl -sL ipinfo.io/ip)
+export MY_IP=$(curl -sL ipinfo.io/ip)
 envsubst < ./ingress.yaml.tpl | kubectl apply -f -
 ```
 
