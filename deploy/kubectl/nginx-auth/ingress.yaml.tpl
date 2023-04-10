@@ -2,7 +2,7 @@
 # To use sslip.io: https://sslip.io/
 # To get your public IP: curl ipinfo.io/ip
 
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: kube-explorer
@@ -10,7 +10,6 @@ metadata:
   labels:
     app: kube-explorer
   annotations:
-    kubernetes.io/ingress.class: "nginx"
     nginx.ingress.kubernetes.io/auth-type: basic
     nginx.ingress.kubernetes.io/auth-secret: kube-explorer
     nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required - kube-explorer'
@@ -20,6 +19,9 @@ spec:
     http:
       paths:
       - path: /
+        pathType: Prefix
         backend:
-          serviceName: kube-explorer
-          servicePort: 8989
+          service:
+            name: kube-explorer
+            port:
+              number: 8989

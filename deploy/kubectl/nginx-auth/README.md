@@ -13,9 +13,9 @@ htpasswd -nb username password | base64
 To install this mode, just run this script:
 
 ```
-kubectl apply -f ./secret.yaml
+kubectl create -f ./secret.yaml
 export MY_IP=$(curl -sL ipinfo.io/ip)
-envsubst < ./ingress.yaml.tpl | kubectl apply -f -
+envsubst < ./ingress.yaml.tpl | kubectl create -f -
 ```
 
 For more infos: https://kubernetes.github.io/ingress-nginx/examples/auth/basic/
