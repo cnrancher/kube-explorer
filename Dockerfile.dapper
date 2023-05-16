@@ -1,28 +1,23 @@
-FROM golang:1.19
+FROM registry.suse.com/bci/golang:1.19
 
 ARG DAPPER_HOST_ARCH
 ENV HOST_ARCH=${DAPPER_HOST_ARCH} ARCH=${DAPPER_HOST_ARCH}
 
-RUN apt-get update && \
-    apt-get install -y ca-certificates git wget curl xz-utils && \
-    rm -f /bin/sh && ln -s /bin/bash /bin/sh && \
-    curl -sL https://github.com/upx/upx/releases/download/v4.0.2/upx-4.0.2-${ARCH}_linux.tar.xz | tar xvJf - --strip-components=1 -C /tmp && \
+RUN zypper -n install ca-certificates git-core wget curl unzip tar vim less file xz
+RUN zypper install -y -f docker
+
+ENV UPX_VERSION 4.0.2
+RUN curl -sL https://github.com/upx/upx/releases/download/v${UPX_VERSION}/upx-${UPX_VERSION}-${ARCH}_linux.tar.xz | tar xvJf - --strip-components=1 -C /tmp && \
     mv /tmp/upx /usr/bin/
 
 RUN if [ "${ARCH}" == "amd64" ]; then \
     curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.49.0; \
     fi
 
-ENV DOCKER_URL_amd64=https://get.docker.com/builds/Linux/x86_64/docker-1.10.3 \
-    DOCKER_URL_arm=https://github.com/rancher/docker/releases/download/v1.10.3-ros1/docker-1.10.3_arm \
-    DOCKER_URL_arm64=https://github.com/rancher/docker/releases/download/v1.10.3-ros1/docker-1.10.3_arm64 \
-    DOCKER_URL=DOCKER_URL_${ARCH}
-RUN wget -O - ${!DOCKER_URL} > /usr/bin/docker && chmod +x /usr/bin/docker
-
-ENV GIT_COMMIT="3eb3cd09ee51c80f56f3f4fc8674d985b6e2f4e0" \
+ENV GIT_COMMIT="9fc1f146baae51295bf8d4b3f3a2d24b79fddd43" \
     GIT_BRANCH="ke/v0.2" \
     GIT_SOURCE=${GOPATH}/src/github.com/rancher/steve \
-    CATTLE_DASHBOARD_UI_VERSION="v2.6.11-kube-explorer-ui-rc1"
+    CATTLE_DASHBOARD_UI_VERSION="v2.6.12-kube-explorer-ui-rc1"
 
 ENV DAPPER_ENV REPO TAG DRONE_TAG CROSS
 ENV DAPPER_SOURCE /opt/kube-explorer
