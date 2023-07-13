@@ -17,7 +17,7 @@ RUN if [ "${ARCH}" == "amd64" ]; then \
 ENV GIT_COMMIT="1dd514a7f86d9aeecfbac12a3b3f33a22de123cd" \
     GIT_BRANCH="ke/v0.3" \
     GIT_SOURCE=${GOPATH}/src/github.com/rancher/steve \
-    CATTLE_DASHBOARD_UI_VERSION="v2.7.5-kube-explorer-ui-rc3"
+    CATTLE_DASHBOARD_UI_VERSION="v2.7.5-kube-explorer-ui-rc4"
 
 ENV DAPPER_ENV REPO TAG DRONE_TAG CROSS
 ENV DAPPER_SOURCE /opt/kube-explorer
