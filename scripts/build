@@ -39,6 +39,8 @@ else
         -o bin/kube-explorer
 fi
 
+mkdir -p $DAPPER_SOURCE/bin
+
 for f in $(ls ./bin/); do
     if [[ $f != *darwin* ]]; then
         upx -o $DAPPER_SOURCE/bin/$f bin/$f || true

@@ -4,7 +4,7 @@ mkdir -p $(dirname $GIT_SOURCE)
 
 pushd $(dirname $GIT_SOURCE)
 
-git clone --depth=1 --branch ${GIT_BRANCH} https://github.com/niusmallnan/steve.git
+git clone --depth=1 --branch ${GIT_BRANCH} https://github.com/orangedeng/ke-steve.git steve
 cd steve
 git reset --hard ${GIT_COMMIT}
 

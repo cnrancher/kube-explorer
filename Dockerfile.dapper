@@ -1,7 +1,10 @@
-FROM registry.suse.com/bci/golang:1.19
-
+FROM registry.suse.com/bci/golang:1.21
+ARG PROXY
+ARG GOPROXY
 ARG DAPPER_HOST_ARCH
 ENV HOST_ARCH=${DAPPER_HOST_ARCH} ARCH=${DAPPER_HOST_ARCH}
+ENV https_proxy=${PROXY} \
+    http_proxy=${PROXY}
 
 RUN zypper -n install ca-certificates git-core wget curl unzip tar vim less file xz
 RUN zypper install -y -f docker
@@ -11,15 +14,15 @@ RUN curl -sL https://github.com/upx/upx/releases/download/v${UPX_VERSION}/upx-${
     mv /tmp/upx /usr/bin/
 
 RUN if [ "${ARCH}" == "amd64" ]; then \
-    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.49.0; \
+    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.54.2; \
     fi
 
-ENV GIT_COMMIT="5d9667043a7b0b1541743dad47949df489b8ad04" \
+ENV GIT_COMMIT="bcf55b3084dd66ef6236ea6b350d4419c7beb213" \
     GIT_BRANCH="ke/v0.3" \
     GIT_SOURCE=${GOPATH}/src/github.com/rancher/steve \
     CATTLE_DASHBOARD_UI_VERSION="v2.7.5-kube-explorer-ui-rc7"
 
-ENV DAPPER_ENV REPO TAG DRONE_TAG CROSS
+ENV DAPPER_ENV REPO TAG DRONE_TAG CROSS GOPROXY
 ENV DAPPER_SOURCE /opt/kube-explorer
 ENV DAPPER_OUTPUT ./bin ./dist
 ENV DAPPER_DOCKER_SOCKET true
