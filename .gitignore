@@ -19,3 +19,5 @@
 /dist
 /build
 *.swp
+
+/.vscode

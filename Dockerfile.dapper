@@ -9,7 +9,7 @@ ENV https_proxy=${PROXY} \
 RUN zypper -n install ca-certificates git-core wget curl unzip tar vim less file xz
 RUN zypper install -y -f docker
 
-ENV UPX_VERSION 4.0.2
+ENV UPX_VERSION 4.2.1
 RUN curl -sL https://github.com/upx/upx/releases/download/v${UPX_VERSION}/upx-${UPX_VERSION}-${ARCH}_linux.tar.xz | tar xvJf - --strip-components=1 -C /tmp && \
     mv /tmp/upx /usr/bin/
 

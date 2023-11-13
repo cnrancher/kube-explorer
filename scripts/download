@@ -15,4 +15,3 @@ cp index.html ../index.html
 
 popd
 
-$(dirname $0)/hack_fs $GIT_SOURCE/pkg/ui/ui/
