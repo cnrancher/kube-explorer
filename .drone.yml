@@ -27,6 +27,8 @@ steps:
     image: rancher/dapper:v0.6.0
     commands:
       - dapper ci
+    environment:
+      CROSS: "${DRONE_BUILD_EVENT}"
     privileged: true
     volumes:
       - name: docker
@@ -120,7 +122,7 @@ steps:
       - dapper ci
     privileged: true
     environment:
-      CROSS: 1
+      CROSS: "${DRONE_BUILD_EVENT}"
     volumes:
       - name: docker
         path: /var/run/docker.sock
