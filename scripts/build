@@ -46,7 +46,7 @@ else
     CGO_ENABLED=0 go build -tags embed \
         -ldflags \
         "$LD_INJECT_VALUES $LINKFLAGS" \
-        -o bin/kube-explorer
+        -o "bin/kube-explorer-$(uname | tr '[:upper:]' '[:lower:]')-${ARCH}"
 fi
 
 mkdir -p $DAPPER_SOURCE/bin
