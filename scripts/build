@@ -14,40 +14,53 @@ LD_INJECT_VALUES="-X github.com/rancher/steve/pkg/version.Version=$VERSION
 
 pushd $GIT_SOURCE
 
-if [ -n "$CROSS" ]; then
-    for ARCH in ${OS_ARCH_ARG_LINUX}; do
-        OUTPUT_BIN="bin/kube-explorer-linux-$ARCH"
-        echo "Building binary for linux/$ARCH..."
-        GOARCH=$ARCH GOOS=linux CGO_ENABLED=0 go build -tags embed \
-                -ldflags \
-                "$LD_INJECT_VALUES $LINKFLAGS" \
-                -o ${OUTPUT_BIN}
-    done
+case "$CROSS" in 
+    "push")
+        for ARCH in ${OS_ARCH_ARG_LINUX}; do
+            OUTPUT_BIN="bin/kube-explorer-linux-$ARCH"
+            echo "Building binary for linux/$ARCH..."
+            GOARCH=$ARCH GOOS=linux CGO_ENABLED=0 go build -tags embed \
+                    -ldflags \
+                    "$LD_INJECT_VALUES $LINKFLAGS" \
+                    -o ${OUTPUT_BIN}
+        done
+        ;;
+    "tag")
+        for ARCH in ${OS_ARCH_ARG_LINUX}; do
+            OUTPUT_BIN="bin/kube-explorer-linux-$ARCH"
+            echo "Building binary for linux/$ARCH..."
+            GOARCH=$ARCH GOOS=linux CGO_ENABLED=0 go build -tags embed \
+                    -ldflags \
+                    "$LD_INJECT_VALUES $LINKFLAGS" \
+                    -o ${OUTPUT_BIN}
+        done
 
-    for ARCH in ${OS_ARCH_ARG_DARWIN}; do
-        OUTPUT_BIN="bin/kube-explorer-darwin-$ARCH"
-        echo "Building binary for darwin/$ARCH..."
-        GOARCH=$ARCH GOOS=darwin CGO_ENABLED=0 go build -tags embed \
-                -ldflags \
-                "$LD_INJECT_VALUES" \
-                -o ${OUTPUT_BIN}
-    done
+        for ARCH in ${OS_ARCH_ARG_DARWIN}; do
+            OUTPUT_BIN="bin/kube-explorer-darwin-$ARCH"
+            echo "Building binary for darwin/$ARCH..."
+            GOARCH=$ARCH GOOS=darwin CGO_ENABLED=0 go build -tags embed \
+                    -ldflags \
+                    "$LD_INJECT_VALUES" \
+                    -o ${OUTPUT_BIN}
+        done
 
-    for ARCH in ${OS_ARCH_ARG_WINDOWS}; do
-        OUTPUT_BIN="bin/kube-explorer-windows-$ARCH.exe"
-        echo "Building binary for windows/$ARCH..."
-        GOARCH=$ARCH GOOS=windows CGO_ENABLED=0 go build -tags embed \
-                -ldflags \
-                "$LD_INJECT_VALUES" \
-                -o ${OUTPUT_BIN}
-    done
-else
-    # only build one for current platform
-    CGO_ENABLED=0 go build -tags embed \
-        -ldflags \
-        "$LD_INJECT_VALUES $LINKFLAGS" \
-        -o "bin/kube-explorer-$(uname | tr '[:upper:]' '[:lower:]')-${ARCH}"
-fi
+        for ARCH in ${OS_ARCH_ARG_WINDOWS}; do
+            OUTPUT_BIN="bin/kube-explorer-windows-$ARCH.exe"
+            echo "Building binary for windows/$ARCH..."
+            GOARCH=$ARCH GOOS=windows CGO_ENABLED=0 go build -tags embed \
+                    -ldflags \
+                    "$LD_INJECT_VALUES" \
+                    -o ${OUTPUT_BIN}
+        done
+        ;;
+    *)
+        # only build one for current platform
+        CGO_ENABLED=0 go build -tags embed \
+            -ldflags \
+            "$LD_INJECT_VALUES $LINKFLAGS" \
+            -o "bin/kube-explorer-$(uname | tr '[:upper:]' '[:lower:]')-${ARCH}"
+        ;;
+esac
 
 mkdir -p $DAPPER_SOURCE/bin
 
