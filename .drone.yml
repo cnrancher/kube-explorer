@@ -1,309 +1,163 @@
----
+type: docker
 kind: pipeline
-name: default-amd64
+name: push
 
 platform:
   os: linux
   arch: amd64
 
-steps:
-- name: build
-  pull: default
-  image: rancher/dapper:v0.5.8
-  commands:
-  - dapper ci
-  privileged: true
-  volumes:
-  - name: docker
-    path: /var/run/docker.sock
-  when:
-    ref:
-      include:
-      - "refs/heads/main"
-      - "refs/heads/v*"
-    event:
-    - push
-    - pull_request
-
-- name: release
-  pull: default
-  image: rancher/dapper:v0.5.8
-  commands:
-  - dapper ci
-  privileged: true
-  environment:
-    CROSS: 1
-  volumes:
-  - name: docker
-    path: /var/run/docker.sock
-  when:
-    event:
-    - tag
-
-- name: stage-binaries-head
-  image: rancher/dapper:v0.5.8
-  commands:
-  - "cp -r ./bin/kube-explorer ./package/"
-  when:
-    ref:
-      include:
-      - "refs/heads/main"
-      - "refs/heads/v*"
-    event:
-    - push
-
-- name: stage-binaries
-  image: rancher/dapper:v0.5.8
-  commands:
-  - "cp -r ./bin/kube-explorer-linux-amd64 ./package/kube-explorer"
-  when:
-    event:
-    - tag
-
-- name: github_binary_release
-  pull: default
-  image: plugins/github-release
-  settings:
-    api_key:
-      from_secret: github_token
-    checksum:
-    - sha256
-    files:
-    - "bin/*"
-    title: "${DRONE_TAG}"
-    overwrite: true
-  when:
-    event:
-    - tag
-
-- name: docker-publish-head
-  pull: default
-  image: plugins/docker
-  settings:
-    dockerfile: package/Dockerfile
-    context: package/
-    password:
-      from_secret: docker_password
-    repo: cnrancher/kube-explorer
-    tag: head-linux-amd64
-    username:
-      from_secret: docker_username
-  when:
-    ref:
-      include:
-      - "refs/heads/main"
-      - "refs/heads/v*"
-    event:
-    - push
-
-- name: image-scan-head
-  image: aquasec/trivy
-  commands:
-  - trivy image --no-progress --ignore-unfixed --severity HIGH,CRITICAL --scanners vuln --exit-code 1 cnrancher/kube-explorer:head-linux-amd64
-  volumes:
-  - name: docker
-    path: /var/run/docker.sock
-  when:
-    ref:
-      include:
-      - "refs/heads/main"
-      - "refs/heads/v*"
-    event:
-    - push
-
-- name: docker-publish
-  pull: default
-  image: plugins/docker
-  settings:
-    dockerfile: package/Dockerfile
-    context: package/
-    password:
-      from_secret: docker_password
-    repo: cnrancher/kube-explorer
-    tag: ${DRONE_TAG}-linux-amd64
-    username:
-      from_secret: docker_username
-  when:
-    event:
-    - tag
+trigger:
+  event:
+    exclude:
+      - promote
+    include:
+      - push
+      - pull_request
 
 volumes:
-- name: docker
-  host:
-    path: /var/run/docker.sock
+  - name: docker
+    host:
+      path: /var/run/docker.sock
 
 node:
   instance: agent-amd64
 
-trigger:
-  ref:
-    include:
-    - "refs/heads/main"
-    - "refs/heads/v*"
-    - "refs/tags/*"
-  event:
-    exclude:
-    - promote
-
----
-kind: pipeline
-name: default-arm64
-
-platform:
-  os: linux
-  arch: arm64
-
 steps:
-- name: build
-  pull: default
-  image: rancher/dapper:v0.5.8
-  commands:
-  - dapper ci
-  privileged: true
-  volumes:
-  - name: docker
-    path: /var/run/docker.sock
-  when:
-    ref:
-      include:
-      - "refs/heads/main"
-      - "refs/heads/v*"
-      - "refs/tags/*"
-    event:
-    - push
-    - tag
+  - name: build
+    image: rancher/dapper:v0.6.0
+    commands:
+      - dapper ci
+    privileged: true
+    volumes:
+      - name: docker
+        path: /var/run/docker.sock
 
-- name: stage-binaries
-  image: rancher/dapper:v0.5.8
-  commands:
-  - "cp -r ./bin/* ./package/"
-  when:
-    ref:
-      include:
-      - "refs/heads/main"
-      - "refs/heads/v*"
-      - "refs/tags/*"
-    event:
-    - push
-    - tag
+  - name: image-scan-head
+    image: aquasec/trivy
+    commands:
+      - trivy image --no-progress --ignore-unfixed --severity HIGH,CRITICAL --scanners vuln --exit-code 1 cnrancher/kube-explorer:${DRONE_COMMIT:0:7}
+    volumes:
+      - name: docker
+        path: /var/run/docker.sock
+    when:
+      event:
+        - push
+      ref:
+        include:
+          - "refs/heads/main"
+          - "refs/heads/v*"
 
-- name: docker-publish-head
-  pull: default
-  image: plugins/docker
-  settings:
-    build_args:
-    - ARCH=arm64
-    dockerfile: package/Dockerfile
-    context: package/
-    password:
-      from_secret: docker_password
-    repo: cnrancher/kube-explorer
-    tag: head-linux-arm64
-    username:
-      from_secret: docker_username
-  when:
-    ref:
-      include:
-      - "refs/heads/main"
-      - "refs/heads/v*"
-    event:
-    - push
+  - name: install-buildx-support
+    image: tonistiigi/binfmt
+    privileged: true
+    entrypoint:
+      - /usr/bin/binfmt
+    command:
+      - --install
+      - all
+    when:
+      event:
+        - push
+      ref:
+        include:
+          - "refs/heads/main"
+          - "refs/heads/v*"
 
-- name: docker-publish
-  pull: default
-  image: plugins/docker
-  settings:
-    build_args:
-    - ARCH=arm64
-    dockerfile: package/Dockerfile
-    context: package/
-    password:
-      from_secret: docker_password
-    repo: cnrancher/kube-explorer
-    tag: ${DRONE_TAG}-linux-arm64
-    username:
-      from_secret: docker_username
-  when:
-    event:
-    - tag
-
-volumes:
-- name: docker
-  host:
-    path: /var/run/docker.sock
-
-trigger:
-  ref:
-    include:
-    - "refs/heads/main"
-    - "refs/heads/v*"
-    - "refs/tags/*"
-  event:
-    exclude:
-    - promote
-
-node:
-  instance: agent-arm64
+  - name: docker-publish
+    image: thegeeklab/drone-docker-buildx
+    privileged: true
+    settings:
+      platforms: linux/amd64,linux/arm64/v8
+      dockerfile: package/Dockerfile
+      repo: cnrancher/kube-explorer
+      tag: latest
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+    volumes:
+      - name: docker
+        path: /var/run/docker.sock
+    when:
+      event:
+        - push
+      ref:
+        include:
+          - "refs/heads/main"
+          - "refs/heads/v*"
 
 ---
+type: docker
 kind: pipeline
-name: manifest
+name: tag
 
 platform:
   os: linux
   arch: amd64
 
-steps:
-- name: push-manifest-head
-  image: plugins/manifest
-  settings:
-    ignore_missing: true
-    username:
-      from_secret: docker_username
-    password:
-      from_secret: docker_password
-    spec: manifest-head.tmpl
-  when:
-    ref:
-      include:
-      - "refs/heads/main"
-      - "refs/heads/v*"
-    event:
-    - push
-
-- name: push-manifest
-  image: plugins/manifest
-  settings:
-    ignore_missing: true
-    username:
-      from_secret: docker_username
-    password:
-      from_secret: docker_password
-    spec: manifest.tmpl
-  when:
-    event:
-    - tag
+trigger:
+  event:
+    exclude:
+      - promote
+    include:
+      - tag
+  ref:
+    include:
+      - "refs/tags/*"
 
 volumes:
-- name: docker
-  host:
-    path: /var/run/docker.sock
+  - name: docker
+    host:
+      path: /var/run/docker.sock
 
 node:
   instance: agent-amd64
 
-trigger:
-  ref:
-    include:
-    - "refs/heads/main"
-    - "refs/heads/v*"
-    - "refs/tags/*"
-  event:
-    exclude:
-    - promote
+steps:
+  - name: release
+    image: rancher/dapper:v0.6.0
+    commands:
+      - dapper ci
+    privileged: true
+    environment:
+      CROSS: 1
+    volumes:
+      - name: docker
+        path: /var/run/docker.sock
 
-depends_on:
-- default-amd64
-- default-arm64
+  - name: install-buildx-support
+    image: tonistiigi/binfmt
+    privileged: true
+    entrypoint:
+      - /usr/bin/binfmt
+    command:
+      - --install
+      - all
 
-...
+  - name: docker-publish
+    image: thegeeklab/drone-docker-buildx
+    privileged: true
+    settings:
+      platforms: linux/amd64,linux/arm64/v8
+      dockerfile: package/Dockerfile
+      repo: cnrancher/kube-explorer
+      tag: ${DRONE_TAG}
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+    volumes:
+      - name: docker
+        path: /var/run/docker.sock
+
+  - name: github_binary_release
+    image: plugins/github-release
+    settings:
+      api_key:
+        from_secret: github_token
+      checksum:
+        - sha256
+      files:
+        - "bin/*"
+      title: "${DRONE_TAG}"
+      overwrite: true
