@@ -10,7 +10,7 @@ git reset --hard ${GIT_COMMIT}
 
 mkdir -p pkg/ui/ui/dashboard
 cd pkg/ui/ui/dashboard
-curl -sL https://pandaria-dashboard-ui.s3.ap-southeast-2.amazonaws.com/release-2.7-cn/kube-explorer-ui/${CATTLE_DASHBOARD_UI_VERSION}.tar.gz | tar xvzf - --strip-components=2
+curl -sL https://pandaria-dashboard-ui.s3.ap-southeast-2.amazonaws.com/release-2.8-cn/kube-explorer-ui/${CATTLE_DASHBOARD_UI_VERSION}.tar.gz | tar xvzf - --strip-components=2
 cp index.html ../index.html
 
 popd

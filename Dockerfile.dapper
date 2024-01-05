@@ -17,10 +17,10 @@ RUN if [ "${ARCH}" == "amd64" ]; then \
     curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.54.2; \
     fi
 
-ENV GIT_COMMIT="b5d6adfbc855c3e0ef458e0aa0939c2582b8073f" \
-    GIT_BRANCH="ke/v0.3" \
+ENV GIT_COMMIT="dafd3fc3b06454bb1b6a2cea68c561bb57482deb" \
+    GIT_BRANCH="ke/v0.4" \
     GIT_SOURCE=${GOPATH}/src/github.com/rancher/steve \
-    CATTLE_DASHBOARD_UI_VERSION="v2.7.5-kube-explorer-ui-rc7"
+    CATTLE_DASHBOARD_UI_VERSION="v2.8.0-kube-explorer-ui-rc3"
 
 ENV DAPPER_ENV REPO TAG DRONE_TAG CROSS GOPROXY
 ENV DAPPER_SOURCE /opt/kube-explorer
