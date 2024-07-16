@@ -10,6 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 
+	keconfig "github.com/cnrancher/kube-explorer/internal/config"
 	"github.com/cnrancher/kube-explorer/internal/server"
 )
 
@@ -26,7 +27,7 @@ func main() {
 	app.Flags = joinFlags(
 		stevecli.Flags(&config),
 		debug.Flags(&debugconfig),
-		server.Flags(),
+		keconfig.Flags(),
 	)
 	app.Action = run
 

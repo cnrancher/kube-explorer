@@ -2,10 +2,12 @@ package cluster
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httputil"
 	"time"
 
+	"github.com/cnrancher/kube-explorer/internal/config"
 	"github.com/rancher/steve/pkg/podimpersonation"
 	"github.com/rancher/steve/pkg/stores/proxy"
 	"github.com/rancher/wrangler/v3/pkg/schemas/validation"
@@ -18,9 +20,8 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-const (
-	shellPodImage = "rancher/shell:v0.1.20"
-	shellPodNS    = "kube-system"
+var (
+	shellPodNS = "kube-system"
 )
 
 type shell struct {
@@ -145,10 +146,17 @@ func (s *shell) createPod() *v1.Pod {
 							Value: "/home/shell/.kube/config",
 						},
 					},
-					Image:           shellPodImage,
+					Image:           getShellPodImage(),
 					ImagePullPolicy: v1.PullIfNotPresent,
 				},
 			},
 		},
 	}
+}
+
+func getShellPodImage() string {
+	if config.SystemDefaultRegistry == "" {
+		return config.ShellPodImage
+	}
+	return fmt.Sprintf("%s/%s", config.SystemDefaultRegistry, config.ShellPodImage)
 }
