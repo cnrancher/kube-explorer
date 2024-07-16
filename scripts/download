@@ -1,17 +1,18 @@
 #!/bin/bash
 
-mkdir -p $(dirname $GIT_SOURCE)
+source $(dirname $0)/version
 
-pushd $(dirname $GIT_SOURCE)
+cd "$(dirname $0)/.." || exit 1;
 
-git clone --depth=1 --branch ${GIT_BRANCH} https://github.com/orangedeng/ke-steve.git steve
-cd steve
-git reset --hard ${GIT_COMMIT}
+if [[ "$(uname)" == "Darwin" ]]; then
+    TAR_CMD="gtar"
+else
+    TAR_CMD="tar"
+fi
 
-mkdir -p pkg/ui/ui/dashboard
-cd pkg/ui/ui/dashboard
-curl -sL https://pandaria-dashboard-ui.s3.ap-southeast-2.amazonaws.com/release-2.8-cn/kube-explorer-ui/${CATTLE_DASHBOARD_UI_VERSION}.tar.gz | tar xvzf - --strip-components=2
+mkdir -p internal/ui/ui/dashboard 
+cd internal/ui/ui/dashboard || exit 1;
+curl -sL https://pandaria-dashboard-ui.s3.ap-southeast-2.amazonaws.com/release-2.8-cn/kube-explorer-ui/${CATTLE_DASHBOARD_UI_VERSION}.tar.gz | $TAR_CMD xvzf - --strip-components=2
 cp index.html ../index.html
 
-popd
 

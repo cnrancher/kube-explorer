@@ -1,7 +1,8 @@
 #!/bin/bash
 set -e
+source $(dirname $0)/version
 
-pushd $GIT_SOURCE
+cd "$(dirname $0)/.."
 
 if ! command -v golangci-lint; then
     echo Running: go fmt
@@ -9,13 +10,11 @@ if ! command -v golangci-lint; then
     exit
 fi
 
-#echo Running: golangci-lint
-#golangci-lint run
+echo Running: golangci-lint
+golangci-lint run
 
 echo Tidying up modules
 go mod tidy
 
 echo Verifying modules
 go mod verify
-
-popd

@@ -21,3 +21,5 @@
 *.swp
 
 /.vscode
+/vendor
+/internal/ui/ui/

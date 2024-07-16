@@ -1,18 +1,17 @@
 #!/bin/bash
 set -e
 
-source $(dirname $0)/version
+source "$(dirname $0)/version"
+cd "$(dirname $0)/.."
 
 OS_ARCH_ARG_LINUX="amd64 arm arm64"
 OS_ARCH_ARG_DARWIN="amd64 arm64"
 OS_ARCH_ARG_WINDOWS="amd64"
 
-LD_INJECT_VALUES="-X github.com/rancher/steve/pkg/version.Version=$VERSION
-                  -X github.com/rancher/steve/pkg/version.GitCommit=$COMMIT"
+LD_INJECT_VALUES="-X github.com/cnrancher/kube-explorer/internal/version.Version=$VERSION
+                  -X github.com/cnrancher/kube-explorer/internal/version.GitCommit=$COMMIT"
 
 [ "$(uname)" != "Darwin" ] && LINKFLAGS="-extldflags -static -s"
-
-pushd $GIT_SOURCE
 
 case "$CROSS" in 
     "push")
@@ -62,18 +61,19 @@ case "$CROSS" in
         ;;
 esac
 
-mkdir -p $DAPPER_SOURCE/bin
+mkdir -p "$DAPPER_SOURCE/bin"
+mkdir -p "$DAPPER_SOURCE/dist"
 
-for f in $(ls ./bin/); do
-    if [[ $f != *darwin* ]]; then
-        upx -o $DAPPER_SOURCE/bin/$f bin/$f || true
+for f in ./bin/*; do
+    filename=$(basename "$f")
+    if [[ $filename != *darwin* ]]; then
+        upx -o "$DAPPER_SOURCE/dist/$filename" "bin/$filename" || true
     fi
-    if [ -f $DAPPER_SOURCE/bin/$f ]; then
+    if [ -f "$DAPPER_SOURCE/dist/$filename" ]; then
         echo "UPX done!"
     else
         echo "Copy origin file as UPX failed!!!"
-        cp bin/$f $DAPPER_SOURCE/bin/$f
+        cp "bin/$filename" "$DAPPER_SOURCE/dist/$filename"
     fi
 done
 
-popd
