@@ -6,13 +6,8 @@ cd $(dirname $0)
 
 [ "$(uname)" != "Darwin" ] && LINKFLAGS="-extldflags -static -s"
 
-pushd $GIT_SOURCE
-
 CGO_ENABLED=0 go build \
     -ldflags \
     "$LINKFLAGS" \
     -o bin/kube-explorer
 
-mv bin/kube-explorer $DAPPER_SOURCE/bin/
-
-popd

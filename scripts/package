@@ -2,9 +2,7 @@
 set -e
 
 source $(dirname $0)/version
+cd "$(dirname $0)/.."
 
-pushd $DAPPER_SOURCE
+docker build -f package/Dockerfile -t "cnrancher/kube-explorer:$VERSION" .
 
-docker build -f package/Dockerfile -t cnrancher/kube-explorer:$VERSION .
-
-popd
