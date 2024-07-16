@@ -14,6 +14,7 @@ import (
 	"github.com/rancher/wrangler/v3/pkg/kubeconfig"
 	"github.com/rancher/wrangler/v3/pkg/ratelimit"
 
+	"github.com/cnrancher/kube-explorer/internal/config"
 	"github.com/cnrancher/kube-explorer/internal/resources/cluster"
 	"github.com/cnrancher/kube-explorer/internal/ui"
 )
@@ -29,7 +30,7 @@ func ToServer(ctx context.Context, c *cli.Config, sqlCache bool) (*server.Server
 	}
 	restConfig.RateLimiter = ratelimit.None
 
-	restConfig.Insecure = insecureSkipTLSVerify
+	restConfig.Insecure = config.InsecureSkipTLSVerify
 	if restConfig.Insecure {
 		restConfig.CAData = nil
 		restConfig.CAFile = ""

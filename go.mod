@@ -2,12 +2,7 @@ module github.com/cnrancher/kube-explorer
 
 go 1.22.0
 
-replace (
-	github.com/knative/pkg => github.com/rancher/pkg v0.0.0-20190514055449-b30ab9de040e
-	github.com/matryer/moq => github.com/rancher/moq v0.0.0-20200712062324-13d1f37d2d77
-	github.com/rancher/steve => github.com/rancher/steve v0.0.0-20240709130809-47871606146c
-	k8s.io/client-go => k8s.io/client-go v0.30.1
-)
+replace k8s.io/client-go => k8s.io/client-go v0.30.1
 
 require (
 	github.com/gorilla/mux v1.8.1

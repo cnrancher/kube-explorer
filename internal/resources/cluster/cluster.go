@@ -20,7 +20,7 @@ func Register(_ context.Context, server *server.Server, displayName string) erro
 	shell := &shell{
 		cg:           cg,
 		namespace:    shellPodNS,
-		impersonator: podimpersonation.New("shell", cg, time.Hour, func() string { return shellPodImage }),
+		impersonator: podimpersonation.New("shell", cg, time.Hour, getShellPodImage),
 	}
 
 	clusterSchema := server.BaseSchemas.LookupSchema("management.cattle.io.cluster")
