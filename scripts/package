@@ -4,5 +4,6 @@ set -e
 source $(dirname $0)/version
 cd "$(dirname $0)/.."
 
-docker build -f package/Dockerfile -t "cnrancher/kube-explorer:$VERSION" .
+cp dist/* package/
+docker build -f package/Dockerfile -t "cnrancher/kube-explorer:$VERSION" package
 
