@@ -1,0 +1,70 @@
+name: Push to Master
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*.*.*'  # Matches any tag that starts with 'v' and follows semantic versioning
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Login to Aliyun ACR
+        uses: docker/login-action@v3
+        with:
+          registry: registry.cn-shenzhen.aliyuncs.com
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_TOKEN }}
+        if: ${{ env.ALIYUN == 'true' }}
+      - name: Login to Dockerhub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: CI
+        if: startsWith(github.ref, 'refs/heads/')
+        env: 
+          CROSS: push
+        run: make github_ci
+
+      - name: CI
+        if: startsWith(github.ref, 'refs/tags/')
+        env: 
+          CROSS: tag
+        run: make github_ci
+
+      - name: Prepare for packaging image
+        run: cp dist/* package/
+      - name: Set docker iamge name
+        id: image-name
+        env:
+          REPO_OVERRIDE: ${{ vars.REPO || 'cnrancher' }}
+          IMAGE_OVERRIDE: ${{ vars.IMAGE || 'kube-explorer' }}
+        run: |
+          tag_name=latest;
+          if [[ ${GITHUB_REF} == refs/tags/* ]]; then tag_name=${GITHUB_REF#refs/tags/}; fi; 
+          echo "image_name=${REPO_OVERRIDE}/${IMAGE_OVERRIDE}:${tag_name}" >> $GITHUB_OUTPUT;
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build to Dockerhub
+        uses: docker/build-push-action@v6
+        with:
+          platforms: linux/amd64,linux/arm64/v8
+          tags: "${{ steps.image-name.outputs.image_name }}"
+          context: package
+          push: true
+      - name: Build to Aliyun
+        uses: docker/build-push-action@v6
+        with:
+          tags: registry.cn-shenzhen.aliyuncs.com/${{ steps.image-name.outputs.image_name }}
+          context: package
+          push: true
+        if: ${{ env.ALIYUN == 'true' }}
