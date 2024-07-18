@@ -1,3 +1,5 @@
+FROM aevea/release-notary:0.9.2 as tools
+
 FROM registry.suse.com/bci/golang:1.22
 ARG PROXY
 ARG GOPROXY
@@ -16,10 +18,10 @@ RUN curl -sL https://github.com/upx/upx/releases/download/v${UPX_VERSION}/upx-${
 RUN if [ "${ARCH}" == "amd64" ]; then \
     curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.54.2; \
     fi
-
+COPY --from=tools /app/release-notary /usr/local/bin/
 ENV CATTLE_DASHBOARD_UI_VERSION="v2.8.0-kube-explorer-ui-rc3"
     
-ENV DAPPER_ENV REPO TAG DRONE_TAG CROSS GOPROXY
+ENV DAPPER_ENV REPO TAG DRONE_TAG CROSS GOPROXY SKIP_COMPRESS GITHUB_REPOSITORY GITHUB_TOKEN
 ENV DAPPER_SOURCE /go/src/github.com/cnrancher/kube-explorer
 ENV DAPPER_OUTPUT ./bin ./dist
 ENV DAPPER_DOCKER_SOCKET true

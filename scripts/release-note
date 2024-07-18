@@ -1,0 +1,42 @@
+#!/usr/bin/env sh
+
+set -e
+
+source "$(dirname $0)/version"
+cd "$(dirname $0)/.."
+
+mkdir -p dist
+TARGET_PATH="dist/release-note"
+
+if [ -z "$(command -v release-notary)" ]; then
+    echo "release-notary is not found, skip generating release notes."
+    exit 0
+fi
+
+if [ -z "${GIT_TAG}" ]; then
+    echo "running this scrpit without tag, skip generating release notes."
+    exit 0
+fi
+
+GIT_TAG=$(echo "${GIT_TAG}" | grep -E "^v([0-9]+)\.([0-9]+)(\.[0-9]+)?(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$") || true
+
+if [ "${GIT_TAG}" = "" ]; then
+    echo "git GIT_TAG is not validated, skip generating release notes."
+    exit 0
+fi
+
+for tag in $(git tag -l --sort=-v:refname); do
+    if [ "${tag}" = "${GIT_TAG}" ]; then
+        continue
+    fi
+    filterred=$(echo "${tag}" | grep -E "^v([0-9]+)\.([0-9]+)(\.[0-9]+)?(-rc[0-9]*)$") || true
+    if [ "${filterred}" = "" ]; then
+        echo "get real release tag ${tag}, stopping untag"
+        break
+    fi
+    git tag -d ${tag}
+done
+
+echo "following release notes will be published..."
+release-notary publish -d 2>/dev/null | sed '1d' | sed '$d' > $TARGET_PATH
+cat "$TARGET_PATH"
