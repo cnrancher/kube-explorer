@@ -1,18 +1,21 @@
 name: pull request
 on:
-  pull_request: 
+  pull_request:
     types:
       - opened
       - reopened
       - synchronize
-jobs: 
+jobs:
   pr-build:
     runs-on: ubuntu-latest
-    steps: 
-      -
-        name: Checkout
+    steps:
+      - name: Checkout
         uses: actions/checkout@v4
-      -
-        name: Build to test
+        with:
+          fetch-depth: 0
+      - name: Commitsar check
+        uses: aevea/commitsar@v0.20.2
+      - name: Build to test
+        env:
+          SKIP_COMPRESS: "true"
         run: make ci
-
