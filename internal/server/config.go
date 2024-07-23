@@ -17,6 +17,7 @@ import (
 	"github.com/cnrancher/kube-explorer/internal/config"
 	"github.com/cnrancher/kube-explorer/internal/resources/cluster"
 	"github.com/cnrancher/kube-explorer/internal/ui"
+	"github.com/cnrancher/kube-explorer/internal/version"
 )
 
 func ToServer(ctx context.Context, c *cli.Config, sqlCache bool) (*server.Server, error) {
@@ -48,10 +49,15 @@ func ToServer(ctx context.Context, c *cli.Config, sqlCache bool) (*server.Server
 		return nil, err
 	}
 
+	ui, apiui := ui.New(&ui.Options{
+		ReleaseSetting: version.IsRelease,
+		Path:           func() string { return c.UIPath },
+	})
+
 	steveServer, err := server.New(ctx, restConfig, &server.Options{
 		AuthMiddleware: auth,
 		Controllers:    controllers,
-		Next:           ui.New(c.UIPath),
+		Next:           ui,
 		SQLCache:       sqlCache,
 		// router needs to hack here
 		Router: func(h router.Handlers) http.Handler {
@@ -61,6 +67,8 @@ func ToServer(ctx context.Context, c *cli.Config, sqlCache bool) (*server.Server
 	if err != nil {
 		return nil, err
 	}
+
+	steveServer.APIServer.CustomAPIUIResponseWriter(apiui.CSS(), apiui.JS(), func() string { return config.APIUIVersion })
 
 	// registrer local cluster
 	if err := cluster.Register(ctx, steveServer, c.Context); err != nil {

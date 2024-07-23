@@ -11,7 +11,8 @@ OS_ARCH_ARG_DARWIN="amd64 arm64"
 OS_ARCH_ARG_WINDOWS="amd64"
 
 LD_INJECT_VALUES="-X github.com/cnrancher/kube-explorer/internal/version.Version=$VERSION
-                  -X github.com/cnrancher/kube-explorer/internal/version.GitCommit=$COMMIT"
+                  -X github.com/cnrancher/kube-explorer/internal/version.GitCommit=$COMMIT
+                  -X github.com/cnrancher/kube-explorer/internal/config.APIUIVersion=$CATTLE_API_UI_VERSION"
 
 [ "$(uname)" != "Darwin" ] && LINKFLAGS="-extldflags -static -s"
 

@@ -4,29 +4,11 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/cnrancher/kube-explorer/internal/version"
 	"github.com/gorilla/mux"
 )
 
-func New(path string) http.Handler {
-	vue := NewUIHandler(&Options{
-		Path: func() string {
-			if path == "" {
-				return defaultPath
-			}
-			return path
-		},
-		Offline: func() string {
-			if path != "" {
-				return "true"
-			}
-			return "dynamic"
-		},
-		ReleaseSetting: func() bool {
-			return version.IsRelease()
-		},
-	})
-
+func New(opt *Options) (http.Handler, APIUI) {
+	vue := NewUIHandler(opt)
 	router := mux.NewRouter()
 	router.UseEncodedPath()
 
@@ -35,7 +17,8 @@ func New(path string) http.Handler {
 	router.Handle("/dashboard/", vue.IndexFile())
 	router.Handle("/favicon.png", vue.ServeFaviconDashboard())
 	router.Handle("/favicon.ico", vue.ServeFaviconDashboard())
-	router.PathPrefix("/dashboard/").Handler(vue.IndexFileOnNotFound())
+	router.PathPrefix("/dashboard/").Handler(vue.ServeAssets(vue.IndexFile()))
+	router.PathPrefix("/api-ui/").Handler(vue.ServeAssets(http.NotFoundHandler()))
 	router.PathPrefix("/k8s/clusters/local").HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		url := strings.TrimPrefix(req.URL.Path, "/k8s/clusters/local")
 		if url == "" {
@@ -44,5 +27,5 @@ func New(path string) http.Handler {
 		http.Redirect(rw, req, url, http.StatusFound)
 	})
 
-	return router
+	return router, apiUI(opt)
 }
