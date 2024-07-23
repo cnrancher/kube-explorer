@@ -14,19 +14,14 @@ import (
 	"github.com/cnrancher/kube-explorer/internal/server"
 )
 
-var (
-	config      stevecli.Config
-	debugconfig debug.Config
-)
-
 func main() {
 	app := cli.NewApp()
 	app.Name = "kube-explorer"
 	app.Version = version.FriendlyVersion()
 	app.Usage = ""
 	app.Flags = joinFlags(
-		stevecli.Flags(&config),
-		debug.Flags(&debugconfig),
+		stevecli.Flags(&keconfig.Steve),
+		debug.Flags(&keconfig.Debug),
 		keconfig.Flags(),
 	)
 	app.Action = run
@@ -38,12 +33,12 @@ func main() {
 
 func run(_ *cli.Context) error {
 	ctx := signals.SetupSignalContext()
-	debugconfig.MustSetupDebug()
-	s, err := server.ToServer(ctx, &config, false)
+	keconfig.Debug.MustSetupDebug()
+	s, err := server.ToServer(ctx, &keconfig.Steve, false)
 	if err != nil {
 		return err
 	}
-	return s.ListenAndServe(ctx, config.HTTPSListenPort, config.HTTPListenPort, nil)
+	return s.ListenAndServe(ctx, keconfig.Steve.HTTPSListenPort, keconfig.Steve.HTTPListenPort, nil)
 }
 
 func joinFlags(flags ...[]cli.Flag) []cli.Flag {

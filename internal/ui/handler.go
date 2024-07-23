@@ -1,43 +1,30 @@
 package ui
 
 import (
-	"crypto/tls"
-	"io"
 	"net/http"
-	"sync"
 
+	"github.com/cnrancher/kube-explorer/internal/ui/content"
 	"github.com/rancher/apiserver/pkg/middleware"
 	"github.com/sirupsen/logrus"
-)
-
-const (
-	defaultPath = "./ui"
-)
-
-var (
-	insecureClient = &http.Client{
-		Transport: &http.Transport{
-			Proxy: http.ProxyFromEnvironment,
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
-		},
-	}
 )
 
 type StringSetting func() string
 type BoolSetting func() bool
 
+func StaticSetting[T any](input T) func() T {
+	return func() T {
+		return input
+	}
+}
+
 type Handler struct {
+	contentHandlers map[string]content.Handler
 	pathSetting     func() string
 	indexSetting    func() string
 	releaseSetting  func() bool
 	offlineSetting  func() string
 	middleware      func(http.Handler) http.Handler
 	indexMiddleware func(http.Handler) http.Handler
-
-	downloadOnce    sync.Once
-	downloadSuccess bool
 }
 
 type Options struct {
@@ -45,7 +32,7 @@ type Options struct {
 	Path StringSetting
 	// The HTTP URL of the index file to download
 	Index StringSetting
-	// Whether or not to run the UI offline, should return true/false/dynamic
+	// Whether or not to run the UI offline, should return true/false/dynamic/embed
 	Offline StringSetting
 	// Whether or not is it release, if true UI will run offline if set to dynamic
 	ReleaseSetting BoolSetting
@@ -57,10 +44,11 @@ func NewUIHandler(opts *Options) *Handler {
 	}
 
 	h := &Handler{
-		indexSetting:   opts.Index,
-		offlineSetting: opts.Offline,
-		pathSetting:    opts.Path,
-		releaseSetting: opts.ReleaseSetting,
+		contentHandlers: make(map[string]content.Handler),
+		indexSetting:    opts.Index,
+		offlineSetting:  opts.Offline,
+		pathSetting:     opts.Path,
+		releaseSetting:  opts.ReleaseSetting,
 		middleware: middleware.Chain{
 			middleware.Gzip,
 			middleware.FrameOptions,
@@ -75,67 +63,76 @@ func NewUIHandler(opts *Options) *Handler {
 	}
 
 	if h.indexSetting == nil {
-		h.indexSetting = func() string {
-			return "https://releases.rancher.com/dashboard/latest/index.html"
-		}
+		h.indexSetting = StaticSetting("")
 	}
 
 	if h.offlineSetting == nil {
-		h.offlineSetting = func() string {
-			return "dynamic"
-		}
+		h.offlineSetting = StaticSetting("dynamic")
 	}
 
 	if h.pathSetting == nil {
-		h.pathSetting = func() string {
-			return defaultPath
-		}
+		h.pathSetting = StaticSetting("")
 	}
 
 	if h.releaseSetting == nil {
-		h.releaseSetting = func() bool {
-			return false
-		}
+		h.releaseSetting = StaticSetting(false)
 	}
+
+	h.contentHandlers["embed"] = content.NewEmbedded(staticContent, "ui")
+	h.contentHandlers["false"] = content.NewExternal(h.indexSetting)
+	h.contentHandlers["true"] = content.NewFilepath(h.pathSetting)
 
 	return h
 }
 
-func (u *Handler) path() (path string, isURL bool) {
-	switch u.offlineSetting() {
-	case "dynamic":
-		if u.releaseSetting() {
-			return u.pathSetting(), false
+func (h *Handler) content() content.Handler {
+	offline := h.offlineSetting()
+	if handler, ok := h.contentHandlers[offline]; ok {
+		return handler
+	}
+	embedHandler := h.contentHandlers["embed"]
+	filepathHandler := h.contentHandlers["true"]
+	externalHandler := h.contentHandlers["false"]
+	// default to dynamic
+	switch {
+	case h.pathSetting() != "":
+		if _, err := filepathHandler.GetIndex(); err == nil {
+			return filepathHandler
 		}
-		if u.canDownload(u.indexSetting()) {
-			return u.indexSetting(), true
-		}
-		return u.pathSetting(), false
-	case "true":
-		return u.pathSetting(), false
+		fallthrough
+	case h.releaseSetting():
+		// release must use embed first
+		return embedHandler
 	default:
-		return u.indexSetting(), true
-	}
-}
-
-func (u *Handler) canDownload(url string) bool {
-	u.downloadOnce.Do(func() {
-		if err := serveIndex(io.Discard, url); err == nil {
-			u.downloadSuccess = true
-		} else {
-			logrus.Errorf("Failed to download %s, falling back to packaged UI", url)
+		// try embed
+		if _, err := embedHandler.GetIndex(); err == nil {
+			return embedHandler
 		}
-	})
-	return u.downloadSuccess
+		return externalHandler
+	}
 }
 
-func serveIndex(resp io.Writer, url string) error {
-	r, err := insecureClient.Get(url)
-	if err != nil {
-		return err
-	}
-	defer r.Body.Close()
+func (h *Handler) ServeAssets(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		h.content().ServeAssets(h.middleware, next).ServeHTTP(w, r)
+	})
+}
 
-	_, err = io.Copy(resp, r.Body)
-	return err
+func (h *Handler) ServeFaviconDashboard() http.Handler {
+	return h.middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		h.content().ServeFaviconDashboard().ServeHTTP(w, r)
+	}))
+}
+
+func (h *Handler) IndexFile() http.Handler {
+	return h.indexMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		rtn, err := h.content().GetIndex()
+		if err != nil {
+			logrus.Warnf("failed to serve index with error %v", err)
+			http.NotFoundHandler().ServeHTTP(w, r)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(rtn)
+	}))
 }
