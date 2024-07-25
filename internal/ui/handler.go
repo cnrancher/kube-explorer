@@ -132,7 +132,6 @@ func (h *Handler) IndexFile() http.Handler {
 			http.NotFoundHandler().ServeHTTP(w, r)
 			return
 		}
-		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write(rtn)
 	}))
 }
