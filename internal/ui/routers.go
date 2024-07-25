@@ -27,5 +27,5 @@ func New(opt *Options) (http.Handler, APIUI) {
 		http.Redirect(rw, req, url, http.StatusFound)
 	})
 
-	return router, apiUI(opt)
+	return proxyMiddleware(router), apiUI(opt)
 }
