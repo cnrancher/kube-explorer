@@ -7,7 +7,6 @@ import (
 var InsecureSkipTLSVerify bool
 var SystemDefaultRegistry string
 var APIUIVersion = "1.1.11"
-
 var ShellPodImage string
 
 func Flags() []cli.Flag {
