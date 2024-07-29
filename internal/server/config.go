@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/rancher/apiserver/pkg/types"
+	"github.com/rancher/apiserver/pkg/urlbuilder"
 	steveauth "github.com/rancher/steve/pkg/auth"
 	"github.com/rancher/steve/pkg/schema"
 	"github.com/rancher/steve/pkg/server"
@@ -61,7 +62,11 @@ func ToServer(ctx context.Context, c *cli.Config, sqlCache bool) (*server.Server
 		SQLCache:       sqlCache,
 		// router needs to hack here
 		Router: func(h router.Handlers) http.Handler {
-			return rewriteLocalCluster(router.Routes(h))
+			return handleProxyHeader(
+				rewriteLocalCluster(
+					router.Routes(h),
+				),
+			)
 		},
 	})
 	if err != nil {
@@ -95,6 +100,15 @@ func rewriteLocalCluster(next http.Handler) http.Handler {
 			if req.URL.Path == "" {
 				req.URL.Path = "/"
 			}
+		}
+		next.ServeHTTP(rw, req)
+	})
+}
+
+func handleProxyHeader(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		if value := req.Header.Get("X-Forwarded-Prefix"); value != "" {
+			req.Header.Set(urlbuilder.PrefixHeader, value)
 		}
 		next.ServeHTTP(rw, req)
 	})
