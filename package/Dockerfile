@@ -1,7 +1,8 @@
-FROM registry.suse.com/bci/bci-minimal:15.6
+FROM registry.suse.com/bci/bci-base:15.6
 ARG TARGETARCH
 ARG TARGETOS
 ENV ARCH=${TARGETARCH:-"amd64"} OS=${TARGETOS:-"linux"}
-COPY entrypoint.sh /usr/bin/
+RUN zypper install -y catatonit
 COPY kube-explorer-${OS}-${ARCH} /usr/bin/kube-explorer
-ENTRYPOINT ["entrypoint.sh"]
+ENTRYPOINT [ "/usr/bin/catatonit", "--" ]
+CMD [ "kube-explorer" ]
