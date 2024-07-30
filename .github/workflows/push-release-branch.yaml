@@ -1,4 +1,4 @@
-name: Push to Master
+name: Push to Release
 
 on:
   push:
