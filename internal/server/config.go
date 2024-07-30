@@ -12,8 +12,8 @@ import (
 	"github.com/rancher/steve/pkg/server"
 	"github.com/rancher/steve/pkg/server/cli"
 	"github.com/rancher/steve/pkg/server/router"
-	"github.com/rancher/wrangler/v3/pkg/kubeconfig"
-	"github.com/rancher/wrangler/v3/pkg/ratelimit"
+	"github.com/rancher/wrangler/v2/pkg/kubeconfig"
+	"github.com/rancher/wrangler/v2/pkg/ratelimit"
 
 	"github.com/cnrancher/kube-explorer/internal/config"
 	"github.com/cnrancher/kube-explorer/internal/resources/cluster"
@@ -21,7 +21,7 @@ import (
 	"github.com/cnrancher/kube-explorer/internal/version"
 )
 
-func ToServer(ctx context.Context, c *cli.Config, sqlCache bool) (*server.Server, error) {
+func ToServer(ctx context.Context, c *cli.Config) (*server.Server, error) {
 	var (
 		auth steveauth.Middleware
 	)
@@ -59,7 +59,6 @@ func ToServer(ctx context.Context, c *cli.Config, sqlCache bool) (*server.Server
 		AuthMiddleware: auth,
 		Controllers:    controllers,
 		Next:           ui,
-		SQLCache:       sqlCache,
 		// router needs to hack here
 		Router: func(h router.Handlers) http.Handler {
 			return handleProxyHeader(
