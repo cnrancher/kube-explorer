@@ -3,6 +3,7 @@ name: Push to Master
 on:
   push:
     branches:
+      - release/v*
       - main
     tags:
       - 'v*.*.*'  # Matches any tag that starts with 'v' and follows semantic versioning
@@ -50,6 +51,7 @@ jobs:
           IMAGE_OVERRIDE: ${{ vars.IMAGE || 'kube-explorer' }}
         run: |
           tag_name=latest;
+          if [[ ${GITHUB_REF} == refs/heads/release/* ]]; then tag_name=${GITHUB_REF#refs/heads/release/}-head; fi;
           if [[ ${GITHUB_REF} == refs/tags/* ]]; then tag_name=${GITHUB_REF#refs/tags/}; fi; 
           echo "image_name=${REPO_OVERRIDE}/${IMAGE_OVERRIDE}:${tag_name}" >> $GITHUB_OUTPUT;
       -
