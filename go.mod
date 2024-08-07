@@ -7,7 +7,7 @@ replace k8s.io/client-go => k8s.io/client-go v0.30.1
 require (
 	github.com/gorilla/mux v1.8.1
 	github.com/rancher/apiserver v0.0.0-20240708202538-39a6f2535146
-	github.com/rancher/steve v0.0.0-20240709130809-47871606146c
+	github.com/rancher/steve v0.0.0-20240806133920-61be17faa3d2
 	github.com/rancher/wrangler/v3 v3.0.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/urfave/cli v1.22.15
