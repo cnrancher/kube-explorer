@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [[ ${GITHUB_REF} == refs/tags/* ]]; then
+    DRONE_TAG=${DRONE_TAG:-${GITHUB_REF#refs/tags/}}
+fi
+
 if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
     DIRTY="-dirty"
 fi
