@@ -19,7 +19,7 @@ RUN if [ "${ARCH}" == "amd64" ]; then \
     curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.61.0; \
     fi
 COPY --from=tools /app/release-notary /usr/local/bin/
-ENV CATTLE_DASHBOARD_UI_VERSION="v2.8.0-kube-explorer-ui-rc3"
+ENV CATTLE_DASHBOARD_UI_VERSION="v2.9.2-kube-explorer-ui-rc1"
 ENV CATTLE_API_UI_VERSION="1.1.11"
 
 ENV DAPPER_ENV REPO TAG DRONE_TAG CROSS GOPROXY SKIP_COMPRESS GITHUB_REPOSITORY GITHUB_TOKEN GITHUB_REF
