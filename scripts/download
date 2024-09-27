@@ -14,7 +14,7 @@ rm -rf internal/ui/ui/*
 
 mkdir -p internal/ui/ui/dashboard 
 cd internal/ui/ui/dashboard || exit 1;
-curl -sL https://pandaria-dashboard-ui.s3.ap-southeast-2.amazonaws.com/release-2.8-cn/kube-explorer-ui/${CATTLE_DASHBOARD_UI_VERSION}.tar.gz | $TAR_CMD xvzf - --strip-components=2
+curl -sL https://pandaria-dashboard-ui.s3.ap-southeast-2.amazonaws.com/release-2.9-cn/kube-explorer-ui/${CATTLE_DASHBOARD_UI_VERSION}.tar.gz | $TAR_CMD xvzf - --strip-components=2
 cp index.html ../index.html
 
 mkdir ../api-ui
