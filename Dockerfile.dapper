@@ -1,6 +1,6 @@
 FROM aevea/release-notary:0.9.2 as tools
 
-FROM registry.suse.com/bci/golang:1.22
+FROM registry.suse.com/bci/golang:1.23
 ARG PROXY
 ARG GOPROXY
 ARG DAPPER_HOST_ARCH
@@ -16,7 +16,7 @@ RUN curl -sL https://github.com/upx/upx/releases/download/v${UPX_VERSION}/upx-${
     mv /tmp/upx /usr/bin/
 
 RUN if [ "${ARCH}" == "amd64" ]; then \
-    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.54.2; \
+    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.61.0; \
     fi
 COPY --from=tools /app/release-notary /usr/local/bin/
 ENV CATTLE_DASHBOARD_UI_VERSION="v2.8.0-kube-explorer-ui-rc3"
