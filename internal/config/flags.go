@@ -8,6 +8,7 @@ var InsecureSkipTLSVerify bool
 var SystemDefaultRegistry string
 var APIUIVersion = "1.1.11"
 var ShellPodImage string
+var BindAddress string
 
 func Flags() []cli.Flag {
 	return []cli.Flag{
@@ -29,6 +30,11 @@ func Flags() []cli.Flag {
 			Hidden:      true,
 			Destination: &APIUIVersion,
 			Value:       APIUIVersion,
+		},
+		cli.StringFlag{
+			Name:        "bind-address",
+			Destination: &BindAddress,
+			Usage:       `Bind address with url format. The supported schemes are unix, tcp and namedpipe, e.g. unix:///path/to/kube-explorer.sock or namedpipe:/\.\pipe\kube-explorer`,
 		},
 	}
 }

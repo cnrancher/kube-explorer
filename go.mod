@@ -5,8 +5,10 @@ go 1.22.0
 replace k8s.io/client-go => k8s.io/client-go v0.30.1
 
 require (
+	github.com/Microsoft/go-winio v0.6.2
 	github.com/gorilla/mux v1.8.1
 	github.com/rancher/apiserver v0.0.0-20240708202538-39a6f2535146
+	github.com/rancher/dynamiclistener v0.6.0-rc2
 	github.com/rancher/steve v0.0.0-20240911190153-79304d93b49b
 	github.com/rancher/wrangler/v3 v3.0.0
 	github.com/sirupsen/logrus v1.9.3
@@ -62,7 +64,6 @@ require (
 	github.com/prometheus/client_model v0.4.0 // indirect
 	github.com/prometheus/common v0.44.0 // indirect
 	github.com/prometheus/procfs v0.10.1 // indirect
-	github.com/rancher/dynamiclistener v0.6.0-rc2 // indirect
 	github.com/rancher/kubernetes-provider-detector v0.1.5 // indirect
 	github.com/rancher/lasso v0.0.0-20240705194423-b2a060d103c1 // indirect
 	github.com/rancher/norman v0.0.0-20240708202514-a0127673d1b9 // indirect
