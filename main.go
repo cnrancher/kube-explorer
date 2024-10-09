@@ -38,7 +38,7 @@ func run(_ *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	return s.ListenAndServe(ctx, keconfig.Steve.HTTPSListenPort, keconfig.Steve.HTTPListenPort, nil)
+	return server.Serve(ctx, s)
 }
 
 func joinFlags(flags ...[]cli.Flag) []cli.Flag {
