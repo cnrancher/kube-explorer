@@ -13,11 +13,12 @@ import (
 )
 
 func Serve(ctx context.Context, server *server.Server) error {
-	listener, ipOrPath, err := ensureListener()
+	listener, ipOrPath, err := ensureListener(ctx)
 	if err != nil {
 		return err
 	}
 	if listener != nil {
+		defer listener.Close()
 		return serveSocket(ctx, ipOrPath, listener, server)
 	}
 	return server.ListenAndServe(ctx, config.Steve.HTTPSListenPort, config.Steve.HTTPListenPort, &dynamicserver.ListenOpts{
@@ -45,7 +46,6 @@ func serveSocket(ctx context.Context, socketPath string, listener net.Listener, 
 	go func() {
 		<-ctx.Done()
 		_ = socketServer.Shutdown(context.Background())
-		_ = listener.Close()
 	}()
 	<-ctx.Done()
 	return ctx.Err()

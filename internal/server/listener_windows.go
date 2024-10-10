@@ -4,6 +4,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"net/url"
@@ -12,7 +13,7 @@ import (
 	"github.com/cnrancher/kube-explorer/internal/config"
 )
 
-func ensureListener() (net.Listener, string, error) {
+func ensureListener(_ context.Context) (net.Listener, string, error) {
 	if config.BindAddress == "" {
 		return nil, "", nil
 	}
