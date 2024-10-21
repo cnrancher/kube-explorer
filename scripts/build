@@ -9,8 +9,10 @@ rm -rf ./bin/* ./dist/*
 BUILD_TARGET="${BUILD_TARGET:-dev}"
 CROSS=${CROSS:-}
 
-if [[ $GITHUB_REF == refs/tags/* ]]; then
+if [[ ${GITHUB_REF} == refs/tags/* ]]; then
     CROSS=tag
+elif [ -n "${GITHUB_REF}"  ]; then
+    CROSS=push
 fi
 
 case "$CROSS" in
