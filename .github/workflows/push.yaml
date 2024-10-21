@@ -5,7 +5,7 @@ on:
     branches:
       - release/v*
       - main
-      - "release-v*"
+      - "release/v*"
     tags:
       - "v*.*.*" # Matches any tag that starts with 'v' and follows semantic versioning
 
