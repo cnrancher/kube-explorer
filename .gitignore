@@ -25,3 +25,5 @@
 /internal/ui/ui/
 **/Dockerfile.dapper*
 !**/Dockerfile.dapper
+
+dist/

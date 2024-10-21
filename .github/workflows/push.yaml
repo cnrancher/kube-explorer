@@ -6,7 +6,7 @@ on:
       - release/v*
       - main
     tags:
-      - 'v*.*.*'  # Matches any tag that starts with 'v' and follows semantic versioning
+      - "v*.*.*" # Matches any tag that starts with 'v' and follows semantic versioning
 
 jobs:
   build-and-deploy:
@@ -16,6 +16,14 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: CI
+        env:
+          CROSS: push
+          SKIP_PACKAGE: "true"
+        run: make ci
+      - name: Prepare for packaging image
+        run: cp dist/* package/
+      # aliyun image to test the docker build is ok
       - name: Login to Aliyun ACR
         uses: docker/login-action@v3
         with:
@@ -23,57 +31,55 @@ jobs:
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_TOKEN }}
         if: ${{ vars.ALIYUN == 'true' }}
+      - name: Aliyun image docker meta
+        if: ${{ vars.ALIYUN == 'true' }}
+        id: aliyun-meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ vars.REPO || 'cnrancher' }}/${{ vars.IMAGE || 'kube-explorer' }}
+          tags: |
+            type=ref,event=tag
+            type=ref,event=branch,suffix=-head
+      - name: Build to Aliyun
+        uses: docker/build-push-action@v6
+        with:
+          labels: ${{ steps.aliyun-meta.outputs.labels }}
+          tags: "${{ steps.aliyun-meta.outputs.tags }}"
+          context: package
+          push: true
+        if: ${{ vars.ALIYUN == 'true' }}
+      
+      # docker hub multi-arch image
       - name: Login to Dockerhub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: CI
-        if: startsWith(github.ref, 'refs/heads/')
-        env: 
-          CROSS: push
-        run: make github_ci
-
-      - name: CI
-        if: startsWith(github.ref, 'refs/tags/')
-        env: 
-          CROSS: tag
-        run: |
-          make github_ci
-          make release-note
-
-      - name: Prepare for packaging image
-        run: cp dist/* package/
-      - name: Set docker iamge name
-        id: image-name
-        env:
-          REPO_OVERRIDE: ${{ vars.REPO || 'cnrancher' }}
-          IMAGE_OVERRIDE: ${{ vars.IMAGE || 'kube-explorer' }}
-        run: |
-          tag_name=latest;
-          if [[ ${GITHUB_REF} == refs/heads/release/* ]]; then tag_name=${GITHUB_REF#refs/heads/release/}-head; fi;
-          if [[ ${GITHUB_REF} == refs/tags/* ]]; then tag_name=${GITHUB_REF#refs/tags/}; fi; 
-          echo "image_name=${REPO_OVERRIDE}/${IMAGE_OVERRIDE}:${tag_name}" >> $GITHUB_OUTPUT;
-      -
-        name: Set up QEMU
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ vars.REPO || 'cnrancher' }}/${{ vars.IMAGE || 'kube-explorer' }}
+          tags: |
+            type=ref,event=tag
+            type=ref,event=branch,suffix=-head
+      - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-      -
-        name: Set up Docker Buildx
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Build to Dockerhub
         uses: docker/build-push-action@v6
         with:
           platforms: linux/amd64,linux/arm64/v8
-          tags: "${{ steps.image-name.outputs.image_name }}"
+          labels: ${{ steps.meta.outputs.labels }}
+          tags: "${{ steps.meta.outputs.tags }}"
           context: package
           push: true
-      - name: Build to Aliyun
-        uses: docker/build-push-action@v6
-        with:
-          tags: registry.cn-shenzhen.aliyuncs.com/${{ steps.image-name.outputs.image_name }}
-          context: package
-          push: true
-        if: ${{ vars.ALIYUN == 'true' }}
+
+      - name: Make release note
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          make release-note
       - name: Release
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
