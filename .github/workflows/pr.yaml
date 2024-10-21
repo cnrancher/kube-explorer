@@ -16,6 +16,4 @@ jobs:
       - name: Commitsar check
         uses: aevea/commitsar@v0.20.2
       - name: Build to test
-        env:
-          SKIP_COMPRESS: "true"
         run: make ci

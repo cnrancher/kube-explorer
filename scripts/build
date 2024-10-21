@@ -6,77 +6,19 @@ cd "$(dirname $0)/.."
 
 rm -rf ./bin/* ./dist/*
 
-OS_ARCH_ARG_LINUX="amd64 arm arm64"
-OS_ARCH_ARG_DARWIN="amd64 arm64"
-OS_ARCH_ARG_WINDOWS="amd64"
+BUILD_TARGET="${BUILD_TARGET:-dev}"
 
-LD_INJECT_VALUES="-X github.com/cnrancher/kube-explorer/internal/version.Version=$VERSION
-                  -X github.com/cnrancher/kube-explorer/internal/version.GitCommit=$COMMIT
-                  -X github.com/cnrancher/kube-explorer/internal/config.APIUIVersion=$CATTLE_API_UI_VERSION"
+if [ -n "$CROSS" ]; then 
+    BUILD_TARGET="prod"
+fi
 
-[ "$(uname)" != "Darwin" ] && LINKFLAGS="-extldflags -static -s"
-
-case "$CROSS" in 
-    "push")
-        for ARCH in ${OS_ARCH_ARG_LINUX}; do
-            OUTPUT_BIN="bin/kube-explorer-linux-$ARCH"
-            echo "Building binary for linux/$ARCH..."
-            GOARCH=$ARCH GOOS=linux CGO_ENABLED=0 go build -tags embed \
-                    -ldflags \
-                    "$LD_INJECT_VALUES $LINKFLAGS" \
-                    -o ${OUTPUT_BIN}
-        done
-        ;;
-    "tag")
-        for ARCH in ${OS_ARCH_ARG_LINUX}; do
-            OUTPUT_BIN="bin/kube-explorer-linux-$ARCH"
-            echo "Building binary for linux/$ARCH..."
-            GOARCH=$ARCH GOOS=linux CGO_ENABLED=0 go build -tags embed \
-                    -ldflags \
-                    "$LD_INJECT_VALUES $LINKFLAGS" \
-                    -o ${OUTPUT_BIN}
-        done
-
-        for ARCH in ${OS_ARCH_ARG_DARWIN}; do
-            OUTPUT_BIN="bin/kube-explorer-darwin-$ARCH"
-            echo "Building binary for darwin/$ARCH..."
-            GOARCH=$ARCH GOOS=darwin CGO_ENABLED=0 go build -tags embed \
-                    -ldflags \
-                    "$LD_INJECT_VALUES" \
-                    -o ${OUTPUT_BIN}
-        done
-
-        for ARCH in ${OS_ARCH_ARG_WINDOWS}; do
-            OUTPUT_BIN="bin/kube-explorer-windows-$ARCH.exe"
-            echo "Building binary for windows/$ARCH..."
-            GOARCH=$ARCH GOOS=windows CGO_ENABLED=0 go build -tags embed \
-                    -ldflags \
-                    "$LD_INJECT_VALUES" \
-                    -o ${OUTPUT_BIN}
-        done
-        ;;
-    *)
-        # only build one for current platform
-        CGO_ENABLED=0 go build -tags embed \
-            -ldflags \
-            "$LD_INJECT_VALUES $LINKFLAGS" \
-            -o "bin/kube-explorer-$(uname | tr '[:upper:]' '[:lower:]')-${ARCH}"
-        ;;
-esac
+BUILD_ARG="${BUILD_ARG:-} --skip validate --id ${BUILD_TARGET}"
 
 mkdir -p "./bin"
+
+# upx is handled  by goreleaser
+VERSION=${VERSION} COMMIT=${COMMIT} goreleaser build $BUILD_ARG
+
 mkdir -p "./dist"
 
-for f in ./bin/*; do
-    filename=$(basename "$f")
-    if [[ $filename != *darwin* && -z "$SKIP_COMPRESS" ]]; then
-        if upx -o "./dist/$filename" "$f"; then
-            echo "UPX done for $filename!"
-        else
-            echo "UPX failed for $filename, copying original file."
-            cp "$f" "./dist/$filename"
-        fi
-    else
-        cp "$f" "./dist/$filename"
-    fi
-done
+cp -r bin/kube-explorer-* dist/
