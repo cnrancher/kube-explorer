@@ -1,3 +1,4 @@
+FROM goreleaser/goreleaser:v2.3.2 as goreleaser
 FROM aevea/release-notary:0.9.2 as tools
 
 FROM registry.suse.com/bci/golang:1.22
@@ -8,8 +9,7 @@ ENV HOST_ARCH=${DAPPER_HOST_ARCH} ARCH=${DAPPER_HOST_ARCH}
 ENV https_proxy=${PROXY} \
     http_proxy=${PROXY}
 
-RUN zypper -n install ca-certificates git-core wget curl unzip tar vim less file xz
-RUN zypper install -y -f docker
+RUN zypper -n install ca-certificates git-core wget curl unzip tar vim less file xz cosign docker
 
 ENV UPX_VERSION 4.2.1
 RUN curl -sL https://github.com/upx/upx/releases/download/v${UPX_VERSION}/upx-${UPX_VERSION}-${ARCH}_linux.tar.xz | tar xvJf - --strip-components=1 -C /tmp && \
@@ -18,11 +18,12 @@ RUN curl -sL https://github.com/upx/upx/releases/download/v${UPX_VERSION}/upx-${
 RUN if [ "${ARCH}" == "amd64" ]; then \
     curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.54.2; \
     fi
+COPY --from=goreleaser /usr/bin/goreleaser /usr/bin/goreleaser 
 COPY --from=tools /app/release-notary /usr/local/bin/
 ENV CATTLE_DASHBOARD_UI_VERSION="v2.8.5-kube-explorer-ui-rc1"
 ENV CATTLE_API_UI_VERSION="1.1.11"
 
-ENV DAPPER_ENV REPO TAG DRONE_TAG CROSS GOPROXY SKIP_COMPRESS GITHUB_REPOSITORY GITHUB_TOKEN
+ENV DAPPER_ENV REPO TAG DRONE_TAG CROSS GOPROXY GITHUB_TOKEN GITHUB_REF GITHUB_REF_NAME BUILD_TARGET SKIP_PACKAGE
 ENV DAPPER_SOURCE /go/src/github.com/cnrancher/kube-explorer
 ENV DAPPER_OUTPUT ./bin ./dist
 ENV DAPPER_DOCKER_SOCKET true
