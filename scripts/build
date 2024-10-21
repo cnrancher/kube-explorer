@@ -7,10 +7,22 @@ cd "$(dirname $0)/.."
 rm -rf ./bin/* ./dist/*
 
 BUILD_TARGET="${BUILD_TARGET:-dev}"
+CROSS=${CROSS:-}
 
-if [ -n "$CROSS" ]; then 
-    BUILD_TARGET="prod"
+if [[ $GITHUB_REF == refs/tags/* ]]; then
+    CROSS=tag
 fi
+
+case "$CROSS" in
+    "tag")
+    BUILD_TARGET="prod"
+    ;;
+    "push")
+    ;;
+    *)
+    BUILD_ARG="${BUILD_ARG} --single-target"
+    ;;
+esac
 
 BUILD_ARG="${BUILD_ARG:-} --skip validate --id ${BUILD_TARGET}"
 
