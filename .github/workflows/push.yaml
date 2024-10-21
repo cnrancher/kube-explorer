@@ -8,6 +8,9 @@ on:
     tags:
       - "v*.*.*" # Matches any tag that starts with 'v' and follows semantic versioning
 
+env:
+  ALIYUN_REGISTRY: ${{ vars.ALIYUN_REGISTRY || '' }}
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -18,36 +21,35 @@ jobs:
           fetch-depth: 0
       - name: CI
         env:
-          CROSS: push
           SKIP_PACKAGE: "true"
         run: make ci
       - name: Prepare for packaging image
         run: cp dist/* package/
       # aliyun image to test the docker build is ok
       - name: Login to Aliyun ACR
+        if: ${{ vars.ALIYUN_REGISTRY != '' }}
         uses: docker/login-action@v3
         with:
-          registry: registry.cn-shenzhen.aliyuncs.com
+          registry: ${{ env.ALIYUN_REGISTRY }}
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_TOKEN }}
-        if: ${{ vars.ALIYUN == 'true' }}
       - name: Aliyun image docker meta
-        if: ${{ vars.ALIYUN == 'true' }}
+        if: ${{ vars.ALIYUN_REGISTRY != '' }}
         id: aliyun-meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ vars.REPO || 'cnrancher' }}/${{ vars.IMAGE || 'kube-explorer' }}
+          images: ${{ env.ALIYUN_REGISTRY }}/${{ vars.REPO || 'cnrancher' }}/${{ vars.IMAGE || 'kube-explorer' }}
           tags: |
             type=ref,event=tag
             type=ref,event=branch,suffix=-head
       - name: Build to Aliyun
+        if: ${{ vars.ALIYUN_REGISTRY != '' }}
         uses: docker/build-push-action@v6
         with:
           labels: ${{ steps.aliyun-meta.outputs.labels }}
           tags: "${{ steps.aliyun-meta.outputs.tags }}"
           context: package
           push: true
-        if: ${{ vars.ALIYUN == 'true' }}
       
       # docker hub multi-arch image
       - name: Login to Dockerhub
